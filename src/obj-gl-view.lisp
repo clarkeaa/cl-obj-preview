@@ -103,7 +103,7 @@
                        (objc:@selector #/doAnimation:) 
                        +null-ptr+ 
                        t)))
-           (runloop (objc:send ns:ns-run-loop 'current-run-loop)))
+           (runloop (#/currentRunLoop ns:ns-run-loop)))
       (objc:send runloop 
                  :add-timer timer
                  :for-mode #@"NSDefaultRunLoopMode")
