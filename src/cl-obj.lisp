@@ -1,8 +1,6 @@
 
 (in-package :cl-user)
 
-(defparameter *obj-path* "Lego_Man.obj")
-
 (defun new-pixel-format (&rest attributes)
   ;; take a list of opengl pixel format attributes (enums and other
   ;; small ints), make an array (character array?), and create and
@@ -32,7 +30,7 @@
     (#/center win)
     (#/orderFront: win nil)))
 
-(defun main ()
+(defun main (obj-path)
   (ns:with-ns-rect (frame 0 0 1024 768)
     (let* ((view (make-instance 'obj-gl-view
                                 :with-frame frame
@@ -43,7 +41,7 @@
                                                #$NSOpenGLPFADepthSize 32))))
       (with-slots (obj) view
         (setf obj (make-instance 'objfile))
-        (load-file obj *obj-path*))
+        (load-file obj obj-path))
       (show-gl-view-in-window view)
       (#/release view)
       (#/performSelectorOnMainThread:withObject:waitUntilDone: 
