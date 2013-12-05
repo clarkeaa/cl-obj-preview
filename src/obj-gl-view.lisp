@@ -15,11 +15,14 @@
   (:metaclass ns:+ns-object))
 
 (objc:defmethod (#/dealloc :void) ((self obj-gl-view))
-  (break)
   (with-slots (animation-timer) self 
     (#/invalidate animation-timer)
     (#/release animation-timer))
   (call-next-method))
+
+(objc:defmethod (#/viewDidMoveToWindow :void) ((self obj-gl-view))
+  (with-slots (animation-timer) self 
+    (#/invalidate animation-timer)))
 
 (objc:defmethod (#/drawRect: :void) ((self obj-gl-view) (rect :<NSR>ect))
   (gl:clear-color 0.0 0.0 0.0 0.0)

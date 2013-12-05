@@ -1,11 +1,5 @@
-#|
-  This file is a part of cl-obj project.
-|#
 
 (in-package :cl-user)
-;; (defpackage cl-obj
-;;   (:use :cl))
-;; (in-package :cl-obj)
 
 (defparameter *obj-path* "Lego_Man.obj")
 
@@ -24,17 +18,23 @@
       (make-instance ns:ns-opengl-pixel-format 
                      :with-attributes objc-attributes))))
 
+(defun show-gl-view-in-window (view)
+  (let* ((win (make-instance 'ns:ns-window
+                             :with-content-rect (#/frame view)
+                             :style-mask (logior #$NSTitledWindowMask
+                                                 #$NSClosableWindowMask
+                                                 #$NSResizableWindowMask
+                                                 #$NSMiniaturizableWindowMask)
+                             :backing #$NSBackingStoreBuffered
+                             :defer t)))      
+    (#/setReleasedWhenClosed: win t)
+    (#/setContentView: win view)      
+    (#/center win)
+    (#/orderFront: win nil)))
+
 (defun main ()
   (ns:with-ns-rect (frame 0 0 1024 768)
-    (let* ((win (make-instance 'ns:ns-window
-                               :with-content-rect frame
-                               :style-mask (logior #$NSTitledWindowMask
-                                                   #$NSClosableWindowMask
-                                                   #$NSResizableWindowMask
-                                                   #$NSMiniaturizableWindowMask)
-                               :backing #$NSBackingStoreBuffered
-                               :defer t))
-           (view (make-instance 'obj-gl-view
+    (let* ((view (make-instance 'obj-gl-view
                                 :with-frame frame
                                 :pixel-format (new-pixel-format 
                                         ;#$NSOpenGLPFADoubleBuffer
@@ -44,11 +44,8 @@
       (with-slots (obj) view
         (setf obj (make-instance 'objfile))
         (load-file obj *obj-path*))
-      (#/setReleasedWhenClosed: win t)
-      (#/setContentView: win view)
+      (show-gl-view-in-window view)
       (#/release view)
-      (#/center win)
-      (#/orderFront: win nil)
       (#/performSelectorOnMainThread:withObject:waitUntilDone: 
        view 
        (objc:@selector #/startAnimating)
