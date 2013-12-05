@@ -7,6 +7,8 @@
 ;;   (:use :cl))
 ;; (in-package :cl-obj)
 
+(defparameter *obj-path* "Lego_Man.obj")
+
 (defun new-pixel-format (&rest attributes)
   ;; take a list of opengl pixel format attributes (enums and other
   ;; small ints), make an array (character array?), and create and
@@ -22,7 +24,7 @@
       (make-instance ns:ns-opengl-pixel-format 
                      :with-attributes objc-attributes))))
 
-(defun show-simple-gl ()
+(defun main ()
   (ns:with-ns-rect (frame 0 0 1024 768)
     (let* ((win (make-instance 'ns:ns-window
                                :with-content-rect frame
@@ -32,13 +34,16 @@
                                                    #$NSMiniaturizableWindowMask)
                                :backing #$NSBackingStoreBuffered
                                :defer t))
-           (view (make-instance 'simple-gl-view
+           (view (make-instance 'obj-gl-view
                                 :with-frame frame
                                 :pixel-format (new-pixel-format 
                                         ;#$NSOpenGLPFADoubleBuffer
                                                #$NSOpenGLPFAAccelerated
                                                #$NSOpenGLPFAColorSize 32
                                                #$NSOpenGLPFADepthSize 32))))
+      (with-slots (obj) view
+        (setf obj (make-instance 'objfile))
+        (load-file obj *obj-path*))
       (#/setReleasedWhenClosed: win t)
       (#/setContentView: win view)
       (#/release view)

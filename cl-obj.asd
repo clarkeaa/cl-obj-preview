@@ -17,7 +17,7 @@
   :components ((:module "src"
                 :components
                 ((:file "objfile")
-                 (:file "simple-gl-view")
+                 (:file "obj-gl-view")
                  (:file "cl-obj"))))
   :description ""
   :long-description

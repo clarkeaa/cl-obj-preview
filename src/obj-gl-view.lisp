@@ -1,7 +1,6 @@
 
 (in-package :cl-user)
 
-(defparameter *obj-path* "Lego_Man.obj")
 (defparameter *animation-timer-delay* (/ 1.0d0 60.0d0))
 (defparameter *eye-vector* (vector 10.0 0.0 70.0))
 (defparameter *center-vector* (vector 0.0 20.0 0.0))
@@ -10,19 +9,19 @@
 (defparameter *light-diffuse* (vector 1.0 1.0 1.0 1.0))
 (defparameter *light-specular* (vector 1 0.7 0.7 1))
 
-(defclass simple-gl-view (ns:ns-opengl-view)
-  ((animation-timer :foreign-type :id :accessor simple-gl-view-animation-timer)
+(defclass obj-gl-view (ns:ns-opengl-view)
+  ((animation-timer :foreign-type :id :accessor obj-gl-view-animation-timer)
    obj)
   (:metaclass ns:+ns-object))
 
-(objc:defmethod (#/dealloc :void) ((self simple-gl-view))
+(objc:defmethod (#/dealloc :void) ((self obj-gl-view))
   (break)
   (with-slots (animation-timer) self 
     (#/invalidate animation-timer)
     (#/release animation-timer))
   (call-next-method))
 
-(objc:defmethod (#/drawRect: :void) ((self simple-gl-view) (rect :<NSR>ect))
+(objc:defmethod (#/drawRect: :void) ((self obj-gl-view) (rect :<NSR>ect))
   (gl:clear-color 0.0 0.0 0.0 0.0)
   (gl:clear :color-buffer-bit :depth-buffer-bit)
   (gl:load-identity)
@@ -40,15 +39,13 @@
     (draw (slot-value self 'obj)))
   (gl:flush))
 
-(objc:defmethod (#/prepareOpenGL :void) ((self simple-gl-view))
+(objc:defmethod (#/prepareOpenGL :void) ((self obj-gl-view))
   (gl:shade-model :smooth)
   (gl:clear-color 0.0 0.0 0.0 0.5)
   (gl:clear-depth 1.0)
   (gl:enable :depth-test)
   (gl:depth-func :lequal)
   (gl:hint :perspective-correction-hint :nicest)
-  (setf (slot-value self 'obj) (make-instance 'objfile))
-  (load-file (slot-value self 'obj) *obj-path*)
   (gl:enable :lighting)
   (gl:enable :light0)
   (gl:light :light0 :position *light-vector*)
@@ -58,10 +55,10 @@
   (gl:enable :cull-face)
   (format t "prepare~%"))
 
-(objc:defmethod (#/mouseDown: :void) ((self simple-gl-view) Event)
+(objc:defmethod (#/mouseDown: :void) ((self obj-gl-view) Event)
   (call-next-method event))
 
-(objc:defmethod (#/keyDown: :void) ((self simple-gl-view) event)
+(objc:defmethod (#/keyDown: :void) ((self obj-gl-view) event)
   (let* ((code (#/keyCode event)))
     (cond ((eql code 126) ;up
            (incf (aref *eye-vector* 2) 0.2))
@@ -72,7 +69,7 @@
           ((eql code 124) ;left
            t))))
     
-(objc:defmethod (#/acceptsFirstResponder :boolean) ((self simple-gl-view)) t)
+(objc:defmethod (#/acceptsFirstResponder :boolean) ((self obj-gl-view)) t)
 
 (defun get-seconds ()
   (let* ((now (get-internal-real-time))
@@ -80,11 +77,11 @@
                     (coerce internal-time-units-per-second 'double-float))))
     seconds))
 
-(objc:defmethod (#/doAnimation: :void) ((self simple-gl-view) timer)
+(objc:defmethod (#/doAnimation: :void) ((self obj-gl-view) timer)
   (declare (ignore timer))
   (#/setNeedsDisplay: self t))
 
-(objc:defmethod (#/reshape :void) ((self simple-gl-view))
+(objc:defmethod (#/reshape :void) ((self obj-gl-view))
   (let* ((frame (#/frame self))
          (width (ns:ns-rect-width frame))
          (height (ns:ns-rect-height frame)))
@@ -96,7 +93,7 @@
     (gl:matrix-mode :modelview)
     (gl:load-identity)))
 
-(objc:defmethod (#/startAnimating :void) ((self simple-gl-view))
+(objc:defmethod (#/startAnimating :void) ((self obj-gl-view))
   (with-slots (animation-timer) self
     (let* ((timer
             (#/retain (#/scheduledTimerWithTimeInterval:target:selector:userInfo:repeats:
