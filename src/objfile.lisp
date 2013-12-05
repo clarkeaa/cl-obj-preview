@@ -24,6 +24,7 @@
   (if (<= (length str) 0) -1 (read-from-string str)))
 
 (defmethod load-file ((obj objfile) filepath)
+  (declare (optimize (speed 3) (debug 0)))
   (with-slots (vertices normals texcoords faces) obj
     (with-open-file (in filepath)
       (when in
@@ -68,6 +69,7 @@
                       (format t "other:~a~%" cmd)))))))))
     
 (defmethod draw ((obj objfile))
+  (declare (optimize (speed 3) (debug 0)))
   (with-slots (vertices normals texcoords faces) obj
     (loop for face across faces do 
          (gl:begin :quads)
